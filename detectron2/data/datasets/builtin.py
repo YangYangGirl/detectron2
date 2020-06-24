@@ -27,7 +27,9 @@ from .pascal_voc import register_pascal_voc
 from .wheat import register_wheat
 from .builtin_meta import _get_builtin_metadata
 
-
+import pandas as pd
+import numpy as np
+import itertools
 # ==== Predefined datasets and splits for COCO ==========
 
 _PREDEFINED_SPLITS_COCO = {}
@@ -213,7 +215,7 @@ def register_all_pascal_voc(root="datasets"):
 def register_all_wheat(root="datasets"):
 
     image_dir = root + '/wheat/train'
-    raw = pd.read_csv(root + '/train.csv')
+    raw = pd.read_csv(root + '/wheat/train.csv')
     raw[['xmin', 'ymin', 'w', 'h']] = pd.DataFrame(raw.bbox.str.strip('[]').str.split(',').tolist()).astype(float)
     raw['xmax'], raw['ymax'], raw['area'] = raw['xmin'] + raw['w'], raw['ymin'] + raw['h'], raw['w'] * raw['h']
     unique_files = raw.image_id.unique()
@@ -229,7 +231,7 @@ def register_all_wheat(root="datasets"):
 
 # Register them all under "./datasets"
 register_all_wheat()
-register_all_coco()
-register_all_lvis()
-register_all_cityscapes()
-register_all_pascal_voc()
+# register_all_coco()
+# register_all_lvis()
+# register_all_cityscapes()
+# register_all_pascal_voc()

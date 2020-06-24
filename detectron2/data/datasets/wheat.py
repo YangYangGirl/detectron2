@@ -10,6 +10,7 @@ from detectron2.structures import BoxMode
 from detectron2.data import DatasetCatalog, MetadataCatalog
 
 import pandas as pd
+import itertools
 
 __all__ = ["register_wheat", "load_wheat_instances"]
 
@@ -20,7 +21,7 @@ CLASS_NAMES = [ "wheat",]
 
 
 def load_wheat_instances(df, image_dir):
-
+    dicts = []
     for img_id, img_name in enumerate(df.image_id.unique()):
 
         record = {}
