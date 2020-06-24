@@ -20,13 +20,6 @@ CLASS_NAMES = [ "wheat",]
 
 
 def load_wheat_instances(df, image_dir):
-    unique_files = raw.image_id.unique()
-
-    train_files = set(np.random.choice(unique_files, int(len(unique_files) * 0.90), replace=False))
-    train_df = raw[raw.image_id.isin(train_files)]
-    test_df = raw[~raw.image_id.isin(train_files)]
-
-    print("len(train), len(test)", len(train_df.image_id.unique()), len(test_df.image_id.unique()))
 
     for img_id, img_name in enumerate(df.image_id.unique()):
 
@@ -65,20 +58,6 @@ def load_wheat_instances(df, image_dir):
         dicts.append(record)
 
     return dicts
-
-
-# # split train, val
-# unique_files = raw.image_id.unique()
-#
-# train_files = set(np.random.choice(unique_files, int(len(unique_files) * 0.90), replace = False))
-# train_df = raw[raw.image_id.isin(train_files)]
-# test_df = raw[~raw.image_id.isin(train_files)]
-#
-#
-# for d in ["train", "val"]:
-#     DatasetCatalog.register("wheat_" + d, lambda: load_wheat_instances(dirname, d))
-#     MetadataCatalog.get("wheat_" + d).set(thing_classes=CLASS_NAMES)
-# balloon_metadata = MetadataCatalog.get("wheat_" + d)
 
 
 def register_wheat(name, df, image_dir):
