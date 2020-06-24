@@ -24,6 +24,7 @@ from .register_coco import register_coco_instances, register_coco_panoptic_separ
 from .lvis import register_lvis_instances, get_lvis_instances_meta
 from .cityscapes import load_cityscapes_instances, load_cityscapes_semantic
 from .pascal_voc import register_pascal_voc
+from .wheat import register_wheat
 from .builtin_meta import _get_builtin_metadata
 
 
@@ -208,7 +209,25 @@ def register_all_pascal_voc(root="datasets"):
         MetadataCatalog.get(name).evaluator_type = "pascal_voc"
 
 
+def register_all_wheat(root="datasets"):
+
+    image_dir = root + '/wheat/train'
+    raw = pd.read_csv(root + '/train.csv')
+    raw[['xmin', 'ymin', 'w', 'h']] = pd.DataFrame(raw.bbox.str.strip('[]').str.split(',').tolist()).astype(float)
+    raw['xmax'], raw['ymax'], raw['area'] = raw['xmin'] + raw['w'], raw['ymin'] + raw['h'], raw['w'] * raw['h']
+    unique_files = raw.image_id.unique()
+    train_files = set(np.random.choice(unique_files, int(len(unique_files) * 0.90), replace=False))
+    train_df = raw[raw.image_id.isin(train_files)]
+    val_df = raw[~raw.image_id.isin(train_files)]
+
+    register_wheat("wheat_train", train_df, image_dir)
+    register_wheat("wheat_val", val_df, image_dir)
+    MetadataCatalog.get("wheat_train").evaluator_type = "wheat"
+    MetadataCatalog.get("wheat_val").evaluator_type = "wheat"
+
+
 # Register them all under "./datasets"
+register_all_wheat()
 register_all_coco()
 register_all_lvis()
 register_all_cityscapes()
