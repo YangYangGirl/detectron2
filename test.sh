@@ -1,0 +1,1 @@
+python demo/demo.py --output ./output --config-file ./configs/Wheat-Detection/faster_rcnn_R_50_FPN_1x.yaml  --input /home/lindelv/yy/github/detectron2/datasets/wheat/test/*   --opts MODEL.WEIGHTS /home/lindelv/yy/github/detectron2/output/model_final.pth

@@ -12,10 +12,9 @@ from detectron2.data.detection_utils import read_image
 from detectron2.utils.logger import setup_logger
 
 from predictor import VisualizationDemo
-
 # constants
 WINDOW_NAME = "COCO detections"
-
+import pandas as pd
 
 def setup_cfg(args):
     # load config from file and command-line arguments
@@ -30,6 +29,13 @@ def setup_cfg(args):
     return cfg
 
 
+def format_prediction_string(boxes, scores):
+    pred_strings = []
+    for j in zip(scores, boxes):
+        pred_strings.append("{0:.4f} {1} {2} {3} {4}".format(j[0], int(j[1][0]), int(j[1][1]), int(j[1][2]), int(j[1][3])))
+
+    return " ".join(pred_strings)
+
 def get_parser():
     parser = argparse.ArgumentParser(description="Detectron2 demo for builtin models")
     parser.add_argument(
@@ -38,7 +44,7 @@ def get_parser():
         metavar="FILE",
         help="path to config file",
     )
-    parser.add_argument("--webcam", action="store_true", help="Take inputs from webcam.")
+    parser.add_argument("--webcam", action="store_false", help="Take inputs from webcam.")
     parser.add_argument("--video-input", help="Path to video file.")
     parser.add_argument("--input", nargs="+", help="A list of space separated input images")
     parser.add_argument(
@@ -72,15 +78,22 @@ if __name__ == "__main__":
 
     demo = VisualizationDemo(cfg)
 
+    #df_sub = pd.read_csv('/home/lindelv/yy/github/detectron2/datasets/wheat/sample_submission.csv')
+
     if args.input:
+        results = []
         if len(args.input) == 1:
             args.input = glob.glob(os.path.expanduser(args.input[0]))
             assert args.input, "The input path(s) was not found"
-        for path in tqdm.tqdm(args.input, disable=not args.output):
+        for imgge_id, path in enumerate(tqdm.tqdm(args.input, disable=not args.output)):
             # use PIL, to be consistent with evaluation
             img = read_image(path, format="BGR")
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img)
+
+            result = {'image_id': path.split('/')[-1], 'PredictionString': format_prediction_string(predictions["instances"].pred_boxes, predictions["instances"].scores)}
+            results.append(result)
+
             logger.info(
                 "{}: detected {} instances in {:.2f}s".format(
                     path, len(predictions["instances"]), time.time() - start_time
@@ -100,6 +113,10 @@ if __name__ == "__main__":
                 cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
+
+        test_df = pd.DataFrame(results, columns=['image_id', 'PredictionString'])
+        test_df.to_csv('./submit/submission.csv', index=False)
+
     elif args.webcam:
         assert args.input is None, "Cannot have both --input and --webcam!"
         cam = cv2.VideoCapture(0)
